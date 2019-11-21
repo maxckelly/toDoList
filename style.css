@@ -1,0 +1,10 @@
+.fa {
+  cursor: pointer;
+  background: red;
+}
+
+.list-items {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
