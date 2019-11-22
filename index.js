@@ -1,33 +1,43 @@
-storage = [];
+let storage = localStorage.getItem('todos');
 
-localStorage.setItem('todos', JSON.stringify(storage));
-const data = JSON.parse(localStorage.getItem('todos'));
+if(!storage){
+  localStorage.setItem('todos', JSON.stringify([]));
+  storage = localStorage.getItem('todos')
+};
+
+storage = JSON.parse(storage)
 
 let form = document.getElementById('to-do-form');
 let submitButton = document.getElementById("to-do-submit-button");
 let totalListItems = document.getElementById("total-list-items");
-let crossIcon = document.getElementById("delete-icon");
-
-// The count is adding an id that increments when a todo is created.
-let count = 0;
+let list = document.querySelector(".list-items");
+let count = 1;
 
 let newToDoFunction = () => {
-  let newToDoInput = document.createElement("li");
-  let newToDoDate = document.createElement("p");
-
-  newToDoInput.innerHTML += form[0].value;
-  newToDoDate.innerHTML += form[1].value;
-  crossIcon.innerHTML += `<i class="fas fa-times-circle", style="cursor:pointer"></i>`;
-
-  newToDoInput.setAttribute("id", "list-items-" + count);
   
-  document.querySelector(".list-item").appendChild(newToDoInput);
-  document.querySelector(".list-item").appendChild(newToDoDate);
-  document.querySelector(".list-item").appendChild(crossIcon);
+  let data = JSON.parse(localStorage.getItem("todos"));
+  
+  data.forEach((todo) => {
+
+    let div = document.createElement('div');
+
+    div.innerHTML = 
+    `
+    <li>${todo.title}</li>
+    <p>${todo.date}</p>
+    <i class="fas fa-times-circle delete", style="cursor:pointer", id="todo-${count}"></i>
+    `
+    console.log(todo)
+    div.setAttribute("id", "list-items-" + count);
+    count++;
+    
+    document.querySelector(".list-items").appendChild(div);
+  })
 };
 
+newToDoFunction();
 
-let total = () => {
+let total = (array) => {
   if (storage.length >= 2) {
     totalListItems.innerHTML = `You have a total of ${storage.length} todos left to complete`
   } else {
@@ -35,38 +45,44 @@ let total = () => {
   };
 };
 
+total();
 
 submitButton.addEventListener("click", function(event) {
+
+  // The below grabs the value of the form 
+  let input = {
+    title: form[0].value,
+    date: form[1].value,
+    index: count
+  };
   
-  newToDoFunction();
-  count ++;
-
-  // The below combines the name and the date together in the one array
-  input = form[0].value + ":" + " " + form[1].value;
-
   // input is then pushed into the toDo array
   storage.push(input);
   localStorage.setItem('todos', JSON.stringify(storage));
-  // The below calls the total function displaying and handling the total text.
-  total();
 
-  data.forEach(item => {
-    newLI(item)
-  })
-  
   // Resets the form back to default
-  event.preventDefault();
   form.reset();
 });
 
-crossIcon.addEventListener("click", function(event) {
 
-  let list = document.querySelector(".list-items");
-  let toDo = document.querySelector(".list-item");
-  
-  list.removeChild(toDo);
-  total();
-  event.preventDefault();
+list.addEventListener('click', function (event) {
+  let id = event.target.id;
+
+  // target the item div
+  let targetItem = event.target.parentElement;
+
+  let idOfTargetItem = targetItem.id;
+  // The below is getting the last character off "list-items-" + count
+  let indexOfItem  = idOfTargetItem[idOfTargetItem.length -1];
+
+  // Goes through the storage and matches with the id above and returns the object
+  let itemInStorage = storage.find( item => {
+    item.index === indexOfItem
+  })
+
+  // Which is then removes the item from storage. 
+  storage.splice(storage.indexOf(itemInStorage), 1)
+
+  localStorage.setItem('todos', JSON.stringify(storage));
 });
-
 
